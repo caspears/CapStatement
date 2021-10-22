@@ -18,8 +18,8 @@ Dependecies:
     lxml
 
 
-To install all dependencies: pip3 install -r requirements.txt
-to run on windows: python -m pip ...
+To install all dependencies: `pip3 install -r requirements.txt`
+to run on windows: `python -m pip ...`
 
 NOTE: fhirclient can be installed via pip or copied from this repository (note that fhirclient is not being maintained in this respository)
 The fhirclient requires the r4models to be installed (also included in this repository in the fhirclient folder. These modified R4 models need to be installed with the fhirclient pip site-package in [installdir]/lib/python/site-packages/fhirclient
@@ -27,11 +27,11 @@ The fhirclient requires the r4models to be installed (also included in this repo
 
 ## Genertate CapabilityStatement with Narrative from xslx file
 
-Usage: python3 R4CapStatement_Maker.py [xlsx file]
+Usage: `python3 R4CapStatement_Maker.py [xlsx file]`
 
 ## Genertate CapabilityStatement Narrative from existing CapabilityStatement
 
-Usage: python3 R4CapStatement_NarrativeMaker.py [json file] {[Artifacts Folder]}
+Usage: `python3 R4CapStatement_NarrativeMaker.py [json file] {[Artifacts Folder]}`
 
 Artifacts folder is optional. It is the location of the locally (pre)built FHIR IG artifacts (output folder). This is used to retrieve the names (title) of artifacts to use as the link text in the generated narrative. 
 For any artifacts for which a name was not retrieved (e.g. no artifact folder provided or externally defined references), the script will attempt to retrieve the artifact (and name) using the artifact's specified url.
