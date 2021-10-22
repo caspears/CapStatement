@@ -3,6 +3,8 @@ FHIR CapabilityStatement generation via python script and Jinja template
 
 Modified from: Eric Haas tool available at: https://github.com/Healthedata1/MyNotebooks/blob/master/CapStatement/R4CapStatement_Maker.ipynb
 
+This tool is mostly adaptations of Eric's great original work.
+
 ## Getting Started
 
 Dependecies: 
