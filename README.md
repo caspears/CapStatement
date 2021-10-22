@@ -40,5 +40,7 @@ For any artifacts for which a name was not retrieved (e.g. no artifact folder pr
 ## Future Plans
 
 Clean up beyond quick and dirty tool.
+
 Merge the two scripts into one script.
+
 Potentially merge with other tooling (including from Eric Haas) to create a single toolset.
