@@ -33,6 +33,8 @@ Usage: `python3 R4CapStatement_Maker.py [xlsx file]`
 
 Usage: `python3 R4CapStatement_NarrativeMaker.py [json file] {[Artifacts Folder]}`
 
+Currently creates a new CapabilityStatement json file prefixed with "Narrative-" 
+
 Artifacts folder is optional. It is the location of the locally (pre)built FHIR IG artifacts (output folder). This is used to retrieve the names (title) of artifacts to use as the link text in the generated narrative. 
 For any artifacts for which a name was not retrieved (e.g. no artifact folder provided or externally defined references), the script will attempt to retrieve the artifact (and name) using the artifact's specified url.
 
