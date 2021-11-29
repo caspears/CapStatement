@@ -214,20 +214,15 @@ def main():
     template = env.get_template(in_file)
 
     sp_map = {sp.code: sp.type for sp in df_sp.itertuples(index=True)}
-    pname_map = {p.Profile: p.Name for p in df_profiles.itertuples(index=True)}
     sp_url_map  = {sp.code: sp.rel_url for sp in df_sp.itertuples(index=True)}
-    purl_map = {p.Profile:p.url if p.url not in none_list else p.Profile for p in df_profiles.itertuples(index=True)}
-    # below taken from source code. Not clear what these are, perhaps from an updated spreadsheet source.
-    #igname_map = {ig.canonical:ig.name for ig in df_igs.itertuples(index=True)}
-    #igurl_map = {ig.canonical:ig.url if ig.url not in none_list else ig.canonical for ig in df_igs.itertuples(index=True)}
-    #csname_map = {cs.canonical:cs.name for cs in df_capstatements.itertuples(index=True)}
-    #csurl_map = {cs.canonical:cs.url if cs.url not in none_list else cs.canonical for cs in df_capstatements.itertuples(index=True)
-
+    pname_map = {p.Profile: p.Name for p in df_profiles.itertuples(index=True)}
     
+    purl_map = {p.Profile:p.url if hasattr(p.Profile , 'url') and p.url not in none_list else p.Profile for p in df_profiles.itertuples(index=True)}
+        
     print(pname_map)
 
     rendered = template.render(cs=cs, path_map=path_map,
-                            pname_map=pname_map, purl_map=purl_map,sp_map=sp_map, sp_url_map=sp_url_map)
+                            pname_map=pname_map, sp_map=sp_map, sp_url_map=sp_url_map, igurl_map='', igname_map='', purl_map=purl_map)
 
     # print(HTML(rendered))
 
@@ -392,9 +387,9 @@ def get_sp(r_type, df_sp, pre, canon):
                  sp.definition = f'{canon}SearchParameter/{i.base.lower()}-{i.code.split("_")[-1]}'
             else:  # use base definition
                 # Check to see if URL is relative or absolute.
-                if(validators.url(i.sp_url)):
+                if(hasattr(i, 'sp_url') and validators.url(i.sp_url)):
                     sp.definition = f'{i.sp_url}'
-                elif (len(i.base_id) > 0): #base id provided
+                elif (hasattr(i, 'base_id') and len(i.base_id) > 0): #base id provided
                     sp.definition = f'{fhir_base_url}SearchParameter/{i.base_id}'
                 else: #otherwise attempt to create the base canonical url - Should use a mapping to determine proper name
                     if (i.code == "_text"): # if a Resource or DomainResource search parameter
