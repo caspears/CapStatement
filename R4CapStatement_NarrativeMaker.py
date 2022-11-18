@@ -240,8 +240,9 @@ def main():
 
     div = div.replace("\\\"", "\"")
     div = "<html><body>" + div + "</body></html>"
-    path = Path.cwd() / 'temper.html'
-    path.write_text(div)
+    # testing output
+    #path = Path.cwd() / 'temper.html'
+    #path.write_text(div)
 
     print('.............validating..............')
     r = validate(capStatement)
