@@ -206,6 +206,8 @@ def main():
     root = etree.fromstring(rendered, parser=parser)
 
     div = (etree.tostring(root[1][0], encoding='unicode', method='html'))
+    div = div.replace("\\n", "")
+    div = div.replace("\\t", "")
 
     print("\n####################################################\n")
     #print(etree.tostring(root[1][0], encoding='unicode', method='html'))
@@ -229,10 +231,15 @@ def main():
     path = Path.cwd() / outfile
     tempOut = dumps(capStatement.as_json(), indent=4)
     tempOut = tempOut.replace("<sup>+</sup>", "<sup>&#8224;</sup>")
+    
     #tempOut = tempOut.replace(“<sup>t</sup>”, “<sup>&#8224;</sup>”)
     #print(tempOut)
     path.write_text(tempOut)
 
+    div = div.replace("\\\"", "\"")
+    div = "<html><body>" + div + "</body></html>"
+    path = Path.cwd() / 'temper.html'
+    path.write_text(div)
 
     print('.............validating..............')
     r = validate(capStatement)

@@ -231,6 +231,10 @@ def main():
     root = etree.fromstring(rendered, parser=parser)
 
     div = (etree.tostring(root[1][0], encoding='unicode', method='html'))
+    # Untested, removing \r and \n. If there is an error generating, please try again after removing the following two lines.
+    div = div.replace("\\n", "")
+    div = div.replace("\\t", "")
+    
     narr = N.Narrative()
     narr.status = 'generated'
     narr.div = div
