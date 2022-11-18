@@ -229,7 +229,7 @@ def main():
 
     #print(dumps(narr.div, indent=3))    # %% [markdown]
     capStatement.text = narr
-    outfile = 'Narrative-' + in_json_file
+    outfile = 'Narrative-' + os.path.basename(in_json_file)
     path = Path.cwd() / outfile
     tempOut = dumps(capStatement.as_json(), indent=4)
     tempOut = tempOut.replace("<sup>+</sup>", "<sup>&#8224;</sup>")
