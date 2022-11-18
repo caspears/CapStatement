@@ -812,9 +812,9 @@
 															</td>
 															<td>
 																{%- for combo in combos.extension if combo.url == 'required' or combo.url == 'optional'-%}
-																	{% set sc = combo.valueString %}
-																	{%- for s in r.searchParam if sc == s.name -%}
-																		{% set ns.spr = s.type %}
+																	{% set sc = combo.valueString %}!!!{{sc}}!!!
+																	{%- for s in r.searchParam %}###{{s.name}}###{% if sc == s.name -%}
+																		{% set ns.spr = s.type %}{%endif%}
 																	{%- endfor %}{% if sp_map[combo.valueString] %}{{sp_map[combo.valueString]}}{% else %}{{ns.spr}}{%endif%}
 																	{%- if not loop.last %}+{% endif %}
 																{%- endfor %}
@@ -822,13 +822,14 @@
 															<td>
 																<code class="highlighter-rouge">GET [base]/{{r.type}}?
 																	{%- for combo in combos.extension if combo.url == 'required' or combo.url == 'optional'-%}{% set sc = combo.valueString %}{%- for s in r.searchParam if sc == s.name -%}
-																			{% set ns.type = s.type %}
-																			{% set ns.name = s.name %}
-																		{%- endfor %}{%- set p = combo.valueString -%}{% if sp_map[combo.valueString] %}
+																			{%- set ns.type = s.type -%}
+																			{%- set ns.name = s.name -%}
+																		{%- endfor %}{%- set p = combo.valueString -%}
+																		{%- if sp_map[combo.valueString] -%}
 																			{%- set t = sp_map[combo.valueString] -%}
-																		{% else %}
+																		{%- else -%}
 																			{%- set t = ns.type -%}
-																		{% endif %}{{p}}{%- if p == '_id' %}=[id]
+																		{%- endif -%}{{p}}{%- if p == '_id' %}=[id]
 																		{%- elif p == '_lastUpdated' %}=[dateTime]
 																		{%- elif p == '_tag' %}=[system]|[code]
 																		{%- elif p == '_profile' %}=[type]
@@ -851,7 +852,7 @@
 																		{%- elif p == '_query' %}=[name]&amp;[parameters]
 																		{%- elif p == '_format' %}=[mime-type]
 																		{%- elif p == '_pretty' %}=[true|false]
-																		{%- elif p in ['us-core-includeprovenance'] %}
+																		{%- elif p in ['us-core-includeprovenance'] -%}
 																		{%- elif t == 'reference' %}=[type]/[id]
 																		{%- elif t == 'status' %}=[status]
 																		{%- elif t == 'composite' %}=[code]&amp;[value]
@@ -859,7 +860,7 @@
 																		{%- elif t == 'string' %}=[{{p}}]
 																		{%- elif t == 'token' %}=[system]|[code]
 																		{%- else %}=[{{p}}]
-																		{%- endif %}{%- if not loop.last %}&amp;{%- endif %}{%- endfor -%}
+																		{%- endif %}{%- if not loop.last -%}&amp;{%- endif -%}{%- endfor -%}
 																</code>
 															</td>
 														</tr>
