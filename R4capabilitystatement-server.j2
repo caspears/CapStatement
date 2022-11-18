@@ -812,8 +812,8 @@
 															</td>
 															<td>
 																{%- for combo in combos.extension if combo.url == 'required' or combo.url == 'optional'-%}
-																	{% set sc = combo.valueString %}!!!{{sc}}!!!
-																	{%- for s in r.searchParam %}###{{s.name}}###{% if sc == s.name -%}
+																	{% set sc = combo.valueString %}
+																	{%- for s in r.searchParam %}{% if sc == s.name -%}
 																		{% set ns.spr = s.type %}{%endif%}
 																	{%- endfor %}{% if sp_map[combo.valueString] %}{{sp_map[combo.valueString]}}{% else %}{{ns.spr}}{%endif%}
 																	{%- if not loop.last %}+{% endif %}
