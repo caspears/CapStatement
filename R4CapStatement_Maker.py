@@ -204,7 +204,7 @@ def main():
     in_file = 'R4capabilitystatement-server.j2'
 
     env = Environment(
-        loader=FileSystemLoader(searchpath=in_path),
+        loader=FileSystemLoader(searchpath=os.path.abspath(os.path.dirname(os.path.realpath(__file__)))),
         autoescape=select_autoescape(['html', 'xml', 'xhtml', 'j2', 'md'])
     )
 
@@ -234,7 +234,7 @@ def main():
     # Untested, removing \r and \n. If there is an error generating, please try again after removing the following two lines.
     div = div.replace("\\n", "")
     div = div.replace("\\t", "")
-    
+
     narr = N.Narrative()
     narr.status = 'generated'
     narr.div = div

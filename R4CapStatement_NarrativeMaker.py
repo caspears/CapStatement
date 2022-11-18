@@ -27,6 +27,7 @@ import sys
 import os
 import os.path
 from os import path
+from os.path import exists
 import glob
 import validators
 import fhirclient.r4models.capabilitystatement as CS
@@ -116,12 +117,12 @@ def main():
     #print(dumps(capStatement.as_json(), indent=3))    # %% [markdown]
 
     # CapabilityStatement loaded
-
     in_path = ''
     in_file = 'R4capabilitystatement-server.j2'
+    #'/Users/cspears/dev/tools/CapStatement/R4capabilitystatement-server.j2'
 
     env = Environment(
-        loader=FileSystemLoader(searchpath=in_path),
+        loader=FileSystemLoader(searchpath=os.path.abspath(os.path.dirname(os.path.realpath(__file__)))),
         autoescape=select_autoescape(['html', 'xml', 'xhtml', 'j2', 'md'])
     )
 
@@ -129,6 +130,7 @@ def main():
 
 
     template = env.get_template(in_file)
+    #parent=os.path.abspath(os.path.dirname(os.path.realpath(__file__))))
 
     pname_map = {}
     igname_map = {}
