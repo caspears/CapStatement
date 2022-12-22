@@ -48,13 +48,12 @@
 				<li><b>Implementation Guide Version:</b> {{cs.version}}</li>
 				<li><b>FHIR Version:</b> {{cs.fhirVersion}}</li>
 				<li><b>Intended Use:</b> {{cs.kind.capitalize()}}</li>
-				<li><b>Supported Formats:</b>
+				<li><b>Supported Formats: </b>
 				{% if cs._format %}
-				{% for format in cs.format %}
-                    <strong>{{cs._format[loop.index0].extension[0].valueCode}}</strong>
-                    support {{ format | upper }}
+				{% for format in cs.format -%}
+                    <strong>{{cs._format[loop.index0].extension[0].valueCode}}</strong> support {{ format | upper }}
 					{%- if not loop.last %}, {% endif %}
-                {% endfor %}
+                {%- endfor -%}
                 {% else %}
                     {{ cs.format | join(', ') | upper }}
 				{% endif %}

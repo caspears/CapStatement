@@ -243,7 +243,18 @@ def main():
     print('...........saving to file............')
     # path = Path.cwd() / f'capabilitystatement-{cs.id.lower()}.json'
     path = Path.cwd() / f'capabilitystatement-{meta.title.lower()}.json'
-    path.write_text(dumps(cs.as_json(), indent=4))
+
+
+    tempOut = dumps(cs.as_json(), indent=4)
+    tempOut = tempOut.replace("<sup>+</sup>", "<sup>&#8224;</sup>")
+    
+    #tempOut = tempOut.replace(“<sup>t</sup>”, “<sup>&#8224;</sup>”)
+    
+    tempOut = tempOut.replace("\\n", "")
+    tempOut = tempOut.replace("\\t", "")
+    path.write_text(tempOut)
+
+    #path.write_text(dumps(cs.as_json(), indent=4))
     print(f"CapabilityStatement saved to:\n\t {path}")
 
 

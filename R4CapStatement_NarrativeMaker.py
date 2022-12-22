@@ -1,7 +1,8 @@
 '''
 Benjamin Langley
 
-Usage: python3 R4CapStatement_NarrativeMaker.py [json file] {[Artifacts Folder]}
+Usage: python3 R4CapStatement_NarrativeMaker.py [json file (wildcards supported)] {[Artifacts Folder]}
+Wildcards for json file name will iterate on all matches (i.e. support for generating narratives for multiple CapabilityStatement files at the same time)
 Dependecies: 
     fhirclient
     pandas
@@ -96,20 +97,25 @@ def markdown(text, *args, **kwargs):
 def main():
     if (len(sys.argv) < 2):
         print(
-            "Error: missing json file - correct usage is:\n\tpython3 R4CapStatement_NarrativeMaker.py [json file] {[Artifacts Folder]}")
+            "Error: missing json file - correct usage is:\n\tpython3 R4CapStatement_NarrativeMaker.py [json file (wildcards supported)] {[Artifacts Folder]}\n\n\tWildcards for json file name will iterate on all matches (i.e. support for generating narratives for multiple CapabilityStatement files at the same time)")
         return
 
-    xls = sys.argv[1]
+    #xls = sys.argv[1]
 
-    in_json_file = sys.argv[1]
+    #in_json_file = sys.argv[1]
     artifacts_folder = ""
     
     if len(sys.argv) > 2:
         artifacts_folder = sys.argv[2]
-   
-    print('....Generating CapabilityStatement Narrative.....')
+
+    for pattern in sys.argv[1:]:
+        for filename in glob.glob(pattern):
+            if os.path.isfile(filename):
+                generate_single(filename, artifacts_folder)
 
 
+def generate_single(in_json_file, artifacts_folder):
+    print('....Generating CapabilityStatement Narrative for ' +  in_json_file + '.....')
 
     with open(in_json_file, 'r') as h:
         pjs = json.load(h)
@@ -208,8 +214,9 @@ def main():
     root = etree.fromstring(rendered, parser=parser)
 
     div = (etree.tostring(root[1][0], encoding='unicode', method='html'))
-    div = div.replace("\\n", "")
-    div = div.replace("\\t", "")
+    #div = div.replace("\\n", "")
+    #div = div.replace("\\t", "")
+    
 
     print("\n####################################################\n")
     #print(etree.tostring(root[1][0], encoding='unicode', method='html'))
@@ -235,7 +242,9 @@ def main():
     tempOut = tempOut.replace("<sup>+</sup>", "<sup>&#8224;</sup>")
     
     #tempOut = tempOut.replace(“<sup>t</sup>”, “<sup>&#8224;</sup>”)
-    #print(tempOut)
+    
+    tempOut = tempOut.replace("\\n", "")
+    tempOut = tempOut.replace("\\t", "")
     path.write_text(tempOut)
 
     div = div.replace("\\\"", "\"")
@@ -474,8 +483,9 @@ def get_pname_map(file_names):
         print("Searching: " + file_name + "\n")
         with open(file_name, 'r') as file_h:
             sd = SD.StructureDefinition(json.load(file_h))
-            pname_map[sd.url] = sd.title
-            print("Found title: " + sd.title + " from URL:" + sd.url + "\n")
+            if sd.title != None:
+                pname_map[sd.url] = sd.title
+                print("Found title: " + sd.title + " from URL:" + sd.url + "\n")
         file_h.close()
     
     return pname_map
