@@ -222,7 +222,7 @@ def main():
     print(pname_map)
 
     rendered = template.render(cs=cs, path_map=path_map,
-                            pname_map=pname_map, sp_map=sp_map, sp_url_map=sp_url_map, igurl_map='', igname_map='', purl_map=purl_map)
+                            pname_map=pname_map, sp_map=sp_map, sp_url_map=sp_url_map, igurl_map={}, igname_map={}, purl_map=purl_map)
 
     # print(HTML(rendered))
 
