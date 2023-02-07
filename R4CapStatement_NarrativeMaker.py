@@ -493,7 +493,7 @@ def get_pname_map(file_names):
 def get_igname_map(file_names):
     igname_map = {}
     for file_name in file_names:
-        with open(file_name, 'r') as file_h:
+        with open(file_name, 'r', encoding="utf-8") as file_h:
             ig = IG.ImplementationGuide(json.load(file_h))
             igname_map[ig.url] = ig.title
         file_h.close()
