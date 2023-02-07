@@ -117,7 +117,7 @@ def main():
 def generate_single(in_json_file, artifacts_folder):
     print('....Generating CapabilityStatement Narrative for ' +  in_json_file + '.....')
 
-    with open(in_json_file, 'r') as h:
+    with open(in_json_file, 'r', encoding="utf-8") as h:
         pjs = json.load(h)
     capStatement = CS.CapabilityStatement(pjs)
     #print(dumps(capStatement.as_json(), indent=3))    # %% [markdown]
@@ -481,7 +481,7 @@ def get_pname_map(file_names):
     pname_map = {}
     for file_name in file_names:
         print("Searching: " + file_name + "\n")
-        with open(file_name, 'r') as file_h:
+        with open(file_name, 'r', encoding="utf-8") as file_h:
             sd = SD.StructureDefinition(json.load(file_h))
             if sd.title != None:
                 pname_map[sd.url] = sd.title
@@ -503,7 +503,7 @@ def get_igname_map(file_names):
 def get_csname_map(file_names):
     csname_map = {}
     for file_name in file_names:
-        with open(file_name, 'r') as file_h:
+        with open(file_name, 'r', encoding="utf-8") as file_h:
             cap_stmt = CS.CapabilityStatement(json.load(file_h))
             csname_map[cap_stmt.url] = cap_stmt.title
         file_h.close()
