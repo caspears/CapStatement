@@ -199,8 +199,8 @@ def generate_single(in_json_file, artifacts_folder):
 
 
 
-    rendered = template.render(cs=capStatement, path_map='', pname_map=pname_map, purl_map='', sp_map='', 
-                            csname_map=csname_map, csurl_map='', sp_url_map='', igname_map=igname_map, igurl_map='')
+    rendered = template.render(cs=capStatement, path_map={}, pname_map=pname_map, purl_map={}, sp_map={}, 
+                            csname_map=csname_map, csurl_map={}, sp_url_map={}, igname_map=igname_map, igurl_map={})
     
     #template.render(cs=cs, path_map=path_map, pname_map=pname_map, purl_map=purl_map, sp_map=sp_map, 
     #                       csname_map=csname_map, csurl_map=csurl_map, igname_map=igname_map, igurl_map=igurl_map)
