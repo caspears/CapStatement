@@ -245,6 +245,10 @@ def generate_single(in_json_file, artifacts_folder):
     
     tempOut = tempOut.replace("\\n", "")
     tempOut = tempOut.replace("\\t", "")
+    tempOut = tempOut.replace("<br></br>", "<br/>")
+    tempOut = tempOut.replace("\\u2666", "&#x2666;")
+    tempOut = tempOut.replace("\\u22c4", "&#x22C4;")
+    tempOut = tempOut.replace("\\u25bf", "&#x25BF;")
     path.write_text(tempOut)
 
     div = div.replace("\\\"", "\"")
