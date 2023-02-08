@@ -39,6 +39,7 @@
 			Add messages and document elements
 			More details on security than just the description? 
 		#}
+		{# Summary table capability expectation symbol handling #}
 		{% set expectation_symbols = {"SHALL": "&#x2666;", "SHOULD": "&#x22C4;", "MAY": "&#x25BF;"} %}
 		{%- macro expectation_symbol(element) -%}
 			{%- if element.extension -%}
@@ -64,6 +65,20 @@
 				{%- endfor -%}
 			{%- endif -%}
 		{% endmacro -%}
+
+		{# capability expectation verb handling
+		
+		<strong>{% if r.extension[0] %}{{r.extension[0].valueCode}}{% else %}(conformance expectation undefined){% endif %}
+		 #}
+		{%- macro expectation_verb(element) -%}
+			{%- if element.extension -%}
+				{%- for extension in element.extension -%}
+					{%- if extension.url == 'http://hl7.org/fhir/StructureDefinition/capabilitystatement-expectation' -%}<span title="{{extension.valueCode}}"><sup>{{ expectation_symbols[extension.valueCode]|safe }}</sup></span>{%- endif -%}
+				{%- endfor -%}
+			{%- endif -%}
+		{% endmacro -%}
+		
+
 	</head>
 	<body>
 		<div xmlns="http://www.w3.org/1999/xhtml">
