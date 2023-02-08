@@ -34,11 +34,36 @@
 
 		{# TODO
 		Possible improvements could include:
-			verifying extension url instead of assuming the extension is for conformance requirement (SHALL, SHOULD, MAY)
+			verifying extension url instead of assuming the extension is for conformance requirement (SHALL, SHOULD, MAY) - switch to using macros
 			Some search parameters that go to the general HL7 search site might have modifiers ":" that need to be removed (Any other decorations?)
 			Add messages and document elements
 			More details on security than just the description? 
 		#}
+		{% set expectation_symbols = {"SHALL": "&#x2666;", "SHOULD": "&#x22C4;", "MAY": "&#x25BF;"} %}
+		{%- macro expectation_symbol(element) -%}
+			{%- if element.extension -%}
+				{%- for extension in element.extension -%}
+					{%- if extension.url == 'http://hl7.org/fhir/StructureDefinition/capabilitystatement-expectation' -%}<span title="{{extension.valueCode}}"><sup>{{ expectation_symbols[extension.valueCode]|safe }}</sup></span>{%- endif -%}
+				{%- endfor -%}
+			{%- endif -%}
+		{% endmacro -%}
+		{%- macro string_and_expectation_symbol(parent, name) -%}
+			{%- if parent[name] -%}
+				{%- for element in parent[name] -%}
+					{{element}}
+					{%- if parent['_' + name] -%}{{expectation_symbol(parent['_' + name][loop.index - 1])}}
+					{%- endif -%}
+					{%- if not loop.last %}, {% endif -%}
+				{%- endfor -%}
+			{%- endif -%}
+		{% endmacro -%}
+		{%- macro expectation_term(element) -%}
+			{%- if element.extension -%}
+				{%- for extension in element.extension -%}
+					{%- if extension.url == 'http://hl7.org/fhir/StructureDefinition/capabilitystatement-expectation' -%}<strong>{{extension.valueCode}}</strong>{%- endif -%}
+				{%- endfor -%}
+			{%- endif -%}
+		{% endmacro -%}
 	</head>
 	<body>
 		<div xmlns="http://www.w3.org/1999/xhtml">
@@ -52,7 +77,7 @@
 				{% if cs._format %}
 				{% for format in cs.format -%}
                     <strong>{{cs._format[loop.index0].extension[0].valueCode}}</strong> support {{ format | upper }}
-					{%- if not loop.last %}, {% endif %}
+					{%- if not loop.last %}, {% endif -%}
                 {%- endfor -%}
                 {% else %}
                     {{ cs.format | join(', ') | upper }}
@@ -336,58 +361,71 @@
 								{% for r in rest.resource %}
 								<tr>
 									<td>
-										<a href="#{{r.type | lower }}">{{r.type}}</a>
+										<a href="#{{r.type | lower }}"><span style="white-space: nowrap;">{{r.type}}{{expectation_symbol(r)}}</span></a>
 									</td>
 									<td>
 										{% if r.interaction %}{% for i in r.interaction %}
-											{{i.code}}
-											{%- if not loop.last %}, {% endif %}
-											{%  endfor %}
-										{% endif %}
+											<span style="white-space: nowrap;">{{i.code}}{{expectation_symbol(i)}}
+											{%- if not loop.last %}, {% endif -%}</span>
+											{%- endfor -%}
+										{%- endif -%}
 									</td>
 
 									<!-- Supported Profiles -->
 									<td>
-										{% if r.supportedProfile %}{% for i in r.supportedProfile %}
-											<a href="{% if path_map[i] %}{{path_map[i]}}{% elif purl_map[i] %}{{purl_map[i]}}{% else %}{{i}}{% endif %}">{% if pname_map[i] %}{{pname_map[i]}}{% else %}({{i}}){% endif %}</a>
-											{%- if not loop.last %}, {% endif %}
-											{%  endfor %}
-										{% endif %}
+										{% if r.supportedProfile %}{% for supportedProfile in r.supportedProfile %}
+											<span style="white-space: nowrap;"><a href="{% if path_map[i] %}{{path_map[supportedProfile]}}{% elif purl_map[i] %}{{purl_map[supportedProfile]}}{% else %}{{supportedProfile}}{% endif %}">{%- if supportedProfile[:40]|lower == 'http://hl7.org/fhir/structuredefinition/'-%}FHIR {{r.type}}{%- elif pname_map[supportedProfile] -%}{{pname_map[supportedProfile]}}{%- else -%}({{supportedProfile}}){%- endif -%}</a>{%- if r._supportedProfile -%}{{expectation_symbol(r._supportedProfile[loop.index - 1])}}{%- endif -%}
+											{%- if not loop.last %}, {% endif -%}</span>
+											{%- endfor -%}
+										{%- endif -%}
 									</td>
 
-									<!-- Supported Searches -->
+									<!-- Supported Searches will need to do some sort of mapping instead of join to get the expectations printed out -->
 									<td>
-										{% if r.searchParam %}{{ r.searchParam|join(', ', attribute='name') }}{% if r.extension %}
-										{%- for s in r.extension if s.url == "http://hl7.org/fhir/StructureDefinition/capabilitystatement-search-parameter-combination" %}
-											{%- if loop.first %}, {% endif %}
-											{%- for combo in s.extension if combo.url == 'required' or combo.url == 'optional'-%}
-											{{combo.valueString}}
-											{%- if not loop.last %}+{% endif %}
-											{%- endfor %}
-										{%- if not loop.last %}, {% endif %}
-										{%- endfor %}
-										{% endif %}
-										{% endif %}
+										{%- if r.searchParam -%}
+												{%- for searchParam in r.searchParam -%}
+													<span style="white-space: nowrap;">{{searchParam.name}}{{expectation_symbol(searchParam)}}
+													{%- if not loop.last %}, {% endif -%}</span>
+												{%- endfor -%}
+												{% if r.extension %}
+												{%- for s in r.extension if s.url == "http://hl7.org/fhir/StructureDefinition/capabilitystatement-search-parameter-combination" %}
+													{%- if loop.first %}, {% endif %}
+													{%- for combo in s.extension if combo.url == 'required' or combo.url == 'optional'-%}
+														{{combo.valueString}}
+														{%- if not loop.last %}+{% endif %}
+														{% if s.extension %}{{ s.extension[0].valueCode }}{% endif %}!!!
+													{%- endfor %}
+												{%- if not loop.last %}, {% endif -%}
+												{%- endfor -%}
+											{%- endif -%}
+										{%- endif -%}
 									</td>
 
 									<!-- Supported _includes -->
 									<td>
-										{% if r.searchInclude%}{{r.searchInclude | join(', ') }}{% endif %}
+										{{string_and_expectation_symbol(r, 'searchInclude')}}
 									</td>
 
 									<!-- Supported _revincludes -->
 									<td>
-										{% if r.searchRevInclude%}{{r.searchRevInclude | join(', ') }}{% endif %}
+										{{string_and_expectation_symbol(r, 'searchRevInclude')}}
+										<!--{% if r.searchRevInclude%}{{r.searchRevInclude | join(', ') }}{% endif %}-->
 									</td>
 
 									<!-- Supported Operations -->
 									<td>
-										{% if r.operation %}${{r.operation | join(', $',attribute='name') }}{% endif %}
+										{%- if r.operation -%}
+											{%- for operation in r.operation -%}
+												<span style="white-space: nowrap;">${{operation.name}}{{expectation_symbol(operation)}}
+												{%- if not loop.last %}, {% endif -%}</span>
+											{%- endfor -%}
+										{%- endif -%}
 									</td>
 								</tr>
 								{% endfor %}
 							</tbody>
 						</table>
+						{%- for key, value in expectation_symbols.items() -%}<i>{{value|safe}} <b>{{key}}</b> level of expectation</i>; <br />{%- endfor -%}
 
 
 
