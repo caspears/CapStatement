@@ -522,7 +522,7 @@ def get_url_title(url, msg_context):
             try:
                 json_data = json.loads(r.content)
                 #Retrieving this as json data instead of from fhirclient objects in case there is a validation error
-                if(json_data['title']):
+                if('title' in json_data):
                     return json_data['title']
                 else:
                     print(bcolors.BOLD + bcolors.FAIL + "Warning: Unable to retrieve title from online " + msg_context + " artifact (" + url + ") - Title will not show up in rendered narrative." + bcolors.ENDC)
