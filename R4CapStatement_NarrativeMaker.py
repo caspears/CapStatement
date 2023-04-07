@@ -141,6 +141,7 @@ def generate_single(in_json_file, artifacts_folder):
     pname_map = {}
     igname_map = {}
     csname_map = {}
+    path_map = {}
     # Load name maps
     if artifacts_folder != "":
         print('....Retrieving Artifact Names .....')
@@ -148,10 +149,18 @@ def generate_single(in_json_file, artifacts_folder):
         struct_def_files = glob.glob(artifacts_folder + "/StructureDefinition-*.json")
         imp_guide_files = glob.glob(artifacts_folder + "/ImplementationGuide-*.json")
         cap_stmt_files = glob.glob(artifacts_folder + "/CapabilityStatement-*.json")
+        spec_path_files = glob.glob(artifacts_folder + "/spec.internals")
         
         pname_map = get_pname_map(struct_def_files)
         igname_map = get_igname_map(imp_guide_files)
         csname_map = get_csname_map(cap_stmt_files)
+        # If spec.internals file is found
+        if(len(spec_path_files) == 1):
+            spec_internals_paths = get_si2(spec_path_files[0])
+            #print(spec_internals_paths)
+            path_map = spec_internals_paths['paths']
+            print(path_map)
+        #sys.exit()
 
     # Check access to hl7.org/fhir
     r = get (fhir_base_url)
@@ -199,7 +208,7 @@ def generate_single(in_json_file, artifacts_folder):
 
 
 
-    rendered = template.render(cs=capStatement, path_map={}, pname_map=pname_map, purl_map={}, sp_map={}, 
+    rendered = template.render(cs=capStatement, path_map=path_map, pname_map=pname_map, purl_map={}, sp_map={}, 
                             csname_map=csname_map, csurl_map={}, sp_url_map={}, igname_map=igname_map, igurl_map={})
     
     #template.render(cs=cs, path_map=path_map, pname_map=pname_map, purl_map=purl_map, sp_map=sp_map, 
