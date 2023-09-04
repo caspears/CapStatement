@@ -527,12 +527,25 @@ def get_url_title(url, msg_context):
     print("Retrieving " + msg_context + " at: " + url)
     try:
         r = get(url, headers={"Accept":"application/json"})
+        #print(bcolors.BOLD + bcolors.WARNING + "!!!!!!Artifact GET return code: " + str(r.status_code) + bcolors.ENDC)
+        if r.status_code == 404:
+            # if unable to retrieve at the canonical, it is likely not published yet. Look at CI build.
+            #http://build.fhir.org/ig/HL7
+            end_slash = url.rfind("/")
+            base_slash = url.rfind("/", 0, url.rfind("/", 0, url.rfind("/")))
+            new_url = "http://build.fhir.org/ig/HL7" + url[base_slash:end_slash] + "-" + url[end_slash+1:] + ".json"
+            print(bcolors.BOLD + bcolors.WARNING + "Warning: Unable to retrieve title from online " + msg_context + " artifact (" + url + ") - Will try alternative url: " + new_url + bcolors.ENDC)
+            r = get(new_url, headers={"Accept":"application/json"})
+            #print(bcolors.BOLD + bcolors.WARNING + "!!!!!!Artifact GET return code: " + str(r.status_code) + bcolors.ENDC)
+        
         if r.status_code == 200:
             try:
                 json_data = json.loads(r.content)
                 #Retrieving this as json data instead of from fhirclient objects in case there is a validation error
                 if('title' in json_data):
                     return json_data['title']
+                if('name' in json_data):
+                    return json_data['name']
                 else:
                     print(bcolors.BOLD + bcolors.FAIL + "Warning: Unable to retrieve title from online " + msg_context + " artifact (" + url + ") - Title will not show up in rendered narrative." + bcolors.ENDC)
             except ValueError:
