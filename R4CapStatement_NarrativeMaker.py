@@ -142,6 +142,7 @@ def generate_single(in_json_file, artifacts_folder):
     igname_map = {}
     csname_map = {}
     path_map = {}
+    ig_dependency_map = {}
     # Load name maps
     if artifacts_folder != "":
         print('....Retrieving Artifact Names .....')
@@ -154,6 +155,25 @@ def generate_single(in_json_file, artifacts_folder):
         pname_map = get_pname_map(struct_def_files)
         igname_map = get_igname_map(imp_guide_files)
         csname_map = get_csname_map(cap_stmt_files)
+
+        # get all IG dependency url to version
+        #load FHIR Version first
+        ig_dependency_map["http://hl7.org/fhir/"] = capStatement.fhirVersion
+        print('....Retrieving all IG Resource dependencies.....')
+        for file_name in imp_guide_files:
+            with open(file_name, 'r', encoding="utf-8") as file_h:
+                print('....Retrieving IG dependencies in ' +  file_name + '.....')
+                ig = IG.ImplementationGuide(json.load(file_h))
+                # There is an issue here that if there are multiple implementation guides with multiple version dependencies, this just uses the last one found.
+                for depends_on in ig.dependsOn:
+                    print('....Found dependency ' +  depends_on.packageId + '.....')
+                    base_dependency_url = depends_on.uri.partition("ImplementationGuide/")[0]
+                    print('....dependency base url ' +  base_dependency_url + '.....')
+                    print('....dependency version ' +  depends_on.version + '.....')
+                    ig_dependency_map[base_dependency_url] = depends_on.version
+            file_h.close()
+        ig_dependency_map["http://hl7.org/fhir/"] = capStatement.fhirVersion
+
         # If spec.internals file is found
         if(len(spec_path_files) == 1):
             spec_internals_paths = get_si2(spec_path_files[0])
@@ -168,24 +188,25 @@ def generate_single(in_json_file, artifacts_folder):
         print('....Retrieving Online Artifact Names .....')
         # Loop through all references in the CapabilityStatement and attempt to retried the artifacts to load the names into the map
         
+        
 
         # Instantiates
         if capStatement.instantiates:
             for url in capStatement.instantiates:
                 if url not in csname_map:
-                    csname_map[url] = get_url_title(url, "instantiates CapabilityStatement")
+                    csname_map[url] = get_url_title(ig_dependency_map, url, "instantiates CapabilityStatement")
 
         # Imports
         if capStatement.imports:
             for url in capStatement.imports:
                 if url not in csname_map:
-                    csname_map[url] = get_url_title(url, "imports CapabilityStatement")
+                    csname_map[url] = get_url_title(ig_dependency_map, url, "imports CapabilityStatement")
 
         # Implementation Guides
         if capStatement.implementationGuide:
             for url in capStatement.implementationGuide:
                 if url not in igname_map:
-                    igname_map[url] = get_url_title(url, "ImplementationGuide")
+                    igname_map[url] = get_url_title(ig_dependency_map, url, "ImplementationGuide")
 
         # Iterate through rest resources
         if capStatement.rest:
@@ -195,12 +216,12 @@ def generate_single(in_json_file, artifacts_folder):
                         if resource.profile:
                             url = resource.profile
                             if url not in pname_map:
-                                pname_map[url] = get_url_title(url, resource.type + " profile")
+                                pname_map[url] = get_url_title(ig_dependency_map, url, resource.type + " profile")
                                 
                         if resource.supportedProfile:
                             for url in resource.supportedProfile:
                                 if url not in pname_map:
-                                    pname_map[url] = get_url_title(url, resource.type + " supported profile")
+                                    pname_map[url] = get_url_title(ig_dependency_map, url, resource.type + " supported profile")
 
     else:
         print("Unable to connect to " + fhir_base_url + ". Will not attempt to load online artifacts to retrieve artifact names.")
@@ -523,20 +544,41 @@ def get_csname_map(file_names):
     
     return csname_map
 
-def get_url_title(url, msg_context):
-    print("Retrieving " + msg_context + " at: " + url)
+def get_url_title(dependency_map, canonical_url, msg_context):
+    print("Retrieving " + msg_context + " for canonical: " + canonical_url)
     try:
-        r = get(url, headers={"Accept":"application/json"})
+        #dependency_map
+        version_url = canonical_url
+
+        for dependency_url in dependency_map:
+            #print(bcolors.BOLD + bcolors.WARNING + "depends: " + dependency_key + bcolors.ENDC)
+            #print(bcolors.BOLD + bcolors.WARNING + "depends: " + dependency_map[dependency_key] + bcolors.ENDC)
+            if canonical_url.startswith(dependency_url, 0, len(dependency_url)):
+                version_url = dependency_url + dependency_map[dependency_url] + "/" + canonical_url[len(dependency_url):]
+                split_version = version_url.rsplit('/', 1)
+                version_url = "-".join(split_version) + ".json"
+                #version_url = canonical_url + "|" + dependency_map[dependency_url]
+                #print(bcolors.BOLD + bcolors.WARNING + "Trying dependency version url: " + version_url + bcolors.ENDC)
+                
+                
+
+        r = get(version_url, headers={"Accept":"application/json"})
         #print(bcolors.BOLD + bcolors.WARNING + "!!!!!!Artifact GET return code: " + str(r.status_code) + bcolors.ENDC)
         if r.status_code == 404:
-            # if unable to retrieve at the canonical, it is likely not published yet. Look at CI build.
-            #http://build.fhir.org/ig/HL7
-            end_slash = url.rfind("/")
-            base_slash = url.rfind("/", 0, url.rfind("/", 0, url.rfind("/")))
-            new_url = "http://build.fhir.org/ig/HL7" + url[base_slash:end_slash] + "-" + url[end_slash+1:] + ".json"
-            print(bcolors.BOLD + bcolors.WARNING + "Warning: Unable to retrieve title from online " + msg_context + " artifact (" + url + ") - Will try alternative url: " + new_url + bcolors.ENDC)
-            r = get(new_url, headers={"Accept":"application/json"})
+            # if unable to retrieve at the version url, Look at canonical url.
+            print(bcolors.BOLD + bcolors.WARNING + "Warning: Unable to retrieve title from online " + msg_context + " artifact (" + version_url + ") - Will try alternative url: " + canonical_url + bcolors.ENDC)
+            r = get(canonical_url, headers={"Accept":"application/json"})
             #print(bcolors.BOLD + bcolors.WARNING + "!!!!!!Artifact GET return code: " + str(r.status_code) + bcolors.ENDC)
+            
+            if r.status_code == 404:
+                # if unable to retrieve at the canonical, it is likely not published yet. Look at CI build.
+                #http://build.fhir.org/ig/HL7
+                end_slash = canonical_url.rfind("/")
+                base_slash = canonical_url.rfind("/", 0, canonical_url.rfind("/", 0, canonical_url.rfind("/")))
+                new_url = "http://build.fhir.org/ig/HL7" + canonical_url[base_slash:end_slash] + "-" + canonical_url[end_slash+1:] + ".json"
+                print(bcolors.BOLD + bcolors.WARNING + "Warning: Unable to retrieve title from online " + msg_context + " artifact (" + canonical_url + ") - Will try alternative url: " + new_url + bcolors.ENDC)
+                r = get(new_url, headers={"Accept":"application/json"})
+                #print(bcolors.BOLD + bcolors.WARNING + "!!!!!!Artifact GET return code: " + str(r.status_code) + bcolors.ENDC)
         
         if r.status_code == 200:
             try:
@@ -547,13 +589,13 @@ def get_url_title(url, msg_context):
                 if('name' in json_data):
                     return json_data['name']
                 else:
-                    print(bcolors.BOLD + bcolors.FAIL + "Warning: Unable to retrieve title from online " + msg_context + " artifact (" + url + ") - Title will not show up in rendered narrative." + bcolors.ENDC)
+                    print(bcolors.BOLD + bcolors.FAIL + "Warning: Unable to retrieve title from online " + msg_context + " artifact (" + canonical_url + ") - Title will not show up in rendered narrative." + bcolors.ENDC)
             except ValueError:
-                print(bcolors.BOLD + bcolors.FAIL + "Warning: Unable to decode online " + msg_context + " artifact (" + url + ") - Title will not show up in rendered narrative." + bcolors.ENDC)
+                print(bcolors.BOLD + bcolors.FAIL + "Warning: Unable to decode online " + msg_context + " artifact (" + canonical_url + ") - Title will not show up in rendered narrative." + bcolors.ENDC)
         else:
-            print(bcolors.BOLD + bcolors.FAIL + "Warning: unable to retrieve online " + msg_context + " artifact (" + url + "). Failed with status code: " + str(r.status_code) + " - Title will not show up in rendered narrative." + bcolors.ENDC)
+            print(bcolors.BOLD + bcolors.FAIL + "Warning: unable to retrieve online " + msg_context + " artifact (" + canonical_url + "). Failed with status code: " + str(r.status_code) + " - Title will not show up in rendered narrative." + bcolors.ENDC)
     except ValueError:
-        print(bcolors.BOLD + bcolors.FAIL + "Warning: Unable to retrieve " + msg_context + " artifact (" + url + ")." + bcolors.ENDC)
+        print(bcolors.BOLD + bcolors.FAIL + "Warning: Unable to retrieve " + msg_context + " artifact (" + canonical_url + ")." + bcolors.ENDC)
 
 
 
