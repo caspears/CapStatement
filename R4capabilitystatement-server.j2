@@ -51,9 +51,9 @@
 		{%- macro string_and_expectation_symbol(parent, name) -%}
 			{%- if parent[name] -%}
 				{%- for element in parent[name] -%}
-					{{element}}
+					<span style="white-space: nowrap;">{{element}}
 					{%- if parent['_' + name] -%}{{expectation_symbol(parent['_' + name][loop.index - 1])}}
-					{%- endif -%}
+					{%- endif -%}</span>
 					{%- if not loop.last %}, {% endif -%}
 				{%- endfor -%}
 			{%- endif -%}
@@ -393,8 +393,8 @@
 									</td>
 									<td>
 										{% if r.interaction %}{% for i in r.interaction %}
-											<span style="white-space: nowrap;">{{i.code}}{{expectation_symbol(i)}}
-											{%- if not loop.last %}, {% endif -%}</span>
+											<span style="white-space: nowrap;">{{i.code}}{{expectation_symbol(i)}}</span>
+											{%- if not loop.last %}, {% endif -%} 
 											{%- endfor -%}
 										{%- endif -%}
 									</td>
@@ -402,8 +402,8 @@
 									<!-- Supported Profiles -->
 									<td>
 										{% if r.supportedProfile %}{% for supportedProfile in r.supportedProfile %}
-											<span style="white-space: nowrap;"><a href="{% if path_map[i] %}{{path_map[supportedProfile]}}{% elif purl_map[i] %}{{purl_map[supportedProfile]}}{% else %}{{supportedProfile}}{% endif %}">{%- if supportedProfile[:40]|lower == 'http://hl7.org/fhir/structuredefinition/'-%}FHIR {{r.type}}{%- elif pname_map[supportedProfile] -%}{{pname_map[supportedProfile]}}{%- else -%}({{supportedProfile}}){%- endif -%}</a>{%- if r._supportedProfile -%}{{expectation_symbol(r._supportedProfile[loop.index - 1])}}{%- endif -%}
-											{% if not loop.last %}, {% endif %}</span> 
+											<a href="{% if path_map[i] %}{{path_map[supportedProfile]}}{% elif purl_map[i] %}{{purl_map[supportedProfile]}}{% else %}{{supportedProfile}}{% endif %}">{%- if supportedProfile[:40]|lower == 'http://hl7.org/fhir/structuredefinition/'-%}FHIR {{r.type}}{%- elif pname_map[supportedProfile] -%}{{pname_map[supportedProfile]}}{%- else -%}({{supportedProfile}}){%- endif -%}</a>{%- if r._supportedProfile -%}{{expectation_symbol(r._supportedProfile[loop.index - 1])}}{%- endif -%}
+											{% if not loop.last %}, {% endif %} 
 											{% endfor %}
 										{% endif %}
 									</td>
@@ -412,20 +412,18 @@
 									<td>
 										{%- if r.searchParam -%}
 											{%- for searchParam in r.searchParam %}
-												<span style="white-space: nowrap;">{{searchParam.name}}{{expectation_symbol(searchParam)}}
-												{%- if not loop.last %}, {% endif %}</span>
+												<span style="white-space: nowrap;">{{searchParam.name}}{{expectation_symbol(searchParam)}}</span>
+												{%- if not loop.last %}, {% endif %}
 											{% endfor -%}
 											{% if r.extension %}
 												{%- for s in r.extension if s.url == "http://hl7.org/fhir/StructureDefinition/capabilitystatement-search-parameter-combination" %}
-													<span style="white-space: nowrap;">
 													{%- if loop.first %}, {% endif %}
 													{%- for combo in s.extension if combo.url == 'required' or combo.url == 'optional'-%}
-														{%- if combo.url == 'optional' -%}<i>{%- endif -%}{{combo.valueString}}{%- if combo.url == 'optional' -%}</i>{%- endif -%}
+														<span style="white-space: nowrap;">{%- if combo.url == 'optional' -%}<i>{%- endif -%}{{combo.valueString}}{%- if combo.url == 'optional' -%}</i>{%- endif -%}</span>
 														{%- if not loop.last %}+{% endif %}
 													{%- endfor -%}
 													{{expectation_symbol(s)}}
 													{%- if not loop.last %}, {% endif -%}
-													</span>
 												{%- endfor -%}
 											{%- endif -%}
 										{%- endif -%}
@@ -446,9 +444,9 @@
 									<td>
 										{%- if r.operation -%}
 											{%- for operation in r.operation -%}
-												<span style="white-space: nowrap;">${{operation.name}}{{expectation_symbol(operation)}}
-												{%- if not loop.last %}, {% endif -%}</span>
-											{%- endfor -%}
+												<span style="white-space: nowrap;">${{operation.name}}{{expectation_symbol(operation)}}</span>
+												{%- if not loop.last %}, {% endif -%}
+											{% endfor -%}
 										{%- endif -%}
 									</td>
 								</tr>
@@ -771,7 +769,7 @@
 											<table class="grid">
 												<thead>
 													<tr>
-														<th>Conformance</th>
+														<th style="white-space: nowrap;">Conformance</th>
 														<th>Parameter</th>
 														<th>Type</th>
 														<th>Example</th>
@@ -849,7 +847,7 @@
 											<table class="grid">
 												<thead>
 													<tr>
-														<th>Conformance</th>
+														<th style="white-space: nowrap;">Conformance</th>
 														<th>Parameter Combination</th>
 														<th>Types</th>
 														<th>Example</th>
