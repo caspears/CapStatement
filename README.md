@@ -5,6 +5,13 @@ Modified from: Eric Haas tool available at: https://github.com/Healthedata1/MyNo
 
 This tool is mostly adaptations of Eric's great original work.
 
+# Integrated IG Publisher Version
+There is a liquid template version of this capabilityStatement narrative generator that can work in line with the FHIR IG Publisher. 
+To use:
+- Copy the liquid folder into the IG base folder
+- Add a parameter to your ImplementationGuide resource or sushi-config.yaml
+- Build the IG
+
 ## Getting Started
 
 Dependecies: 
