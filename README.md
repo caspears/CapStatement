@@ -10,6 +10,31 @@ There is a liquid template version of this capabilityStatement narrative generat
 To use:
 - Copy the liquid folder into the IG base folder
 - Add a parameter to your ImplementationGuide resource or sushi-config.yaml
+
+  Example in sushi-config
+```
+parameters:   
+  path-liquid: liquid
+```
+Example Implementation Guide parameter
+```
+"extension": [
+  {
+    "extension": [
+      {
+        "url": "code",
+        "valueString": "path-liquid"
+      },
+      {
+        "url": "value",
+        "valueString": "liquid"
+      }
+    ],
+    "url": "http://hl7.org/fhir/tools/StructureDefinition/ig-parameter"
+  }
+]
+```
+
 - Build the IG
 
 ## Getting Started
