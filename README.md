@@ -37,6 +37,7 @@ Example Implementation Guide parameter
 
 - Build the IG
 
+# Python Script Narrative Rendering Version
 ## Getting Started
 
 Dependecies: 
