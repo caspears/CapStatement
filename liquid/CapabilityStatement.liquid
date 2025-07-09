@@ -56,6 +56,8 @@
 
   {% if instantiates.exists() or imports.exists() or implementationGuide.exists() %}
     <h3>Support and Requirements for Other Artifacts</h3>
+    <table>
+     <tbody>
     {% if instantiates.exists() %}
       <tr>
         <th>Instantiates other capabilities:</th>
@@ -107,6 +109,8 @@
         </td>
       </tr>
     {% endif %}
+    </tbody>
+   </table>
   {% endif %}
 
   <br/>
